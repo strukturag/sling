@@ -4,10 +4,8 @@ package httpmock
 import (
 	"encoding/json"
 	"errors"
-	"golang.struktur.de/sling"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 	"testing"
 )
@@ -27,57 +25,6 @@ type Transport struct {
 	response http.Response
 	error
 	t *testing.T
-}
-
-type fakeHTTP struct {
-	*http.Client
-	*url.URL
-}
-
-func (fake *fakeHTTP) Do(requestable sling.HTTPRequestable) error {
-	req, responder, err := requestable.HTTPRequest(fake.URL)
-	if err != nil {
-		return err
-	}
-
-	res, err := fake.Client.Do(req)
-	if err != nil {
-		return err
-	}
-	res.Body.Close()
-
-	return responder.OnHTTPResponse(res)
-}
-
-type fakeConnectionPool struct {
-	transport *Transport
-}
-
-// NewConnectionPool returns a connection pool which uses returned mock
-// Transport.
-func NewConnectionPool(t *testing.T) (sling.ConnectionPool, *Transport) {
-	transport := NewTransport(t)
-	return &fakeConnectionPool{
-		transport: transport,
-	}, transport
-}
-
-func (fake *fakeConnectionPool) HTTP(baseURL string) (sling.HTTP, error) {
-	url, _ := url.Parse(baseURL)
-	return &fakeHTTP{
-		Client: &http.Client{
-			Transport: fake.transport,
-		},
-		URL: url,
-	}, nil
-}
-
-// NewHTTP creates a HTTP client with it's own ConnectionPool which uses the
-// returned mock Transport to make requests.
-func NewHTTP(t *testing.T, baseURL string) (sling.HTTP, *Transport) {
-	pool, transport := NewConnectionPool(t)
-	http, _ := pool.HTTP(baseURL)
-	return http, transport
 }
 
 // NewTransport creates a new Transport instance which reports assertion errors

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"golang.struktur.de/sling"
 	"golang.struktur.de/sling/httpmock"
+	"golang.struktur.de/sling/slingmock"
 	"errors"
 	"fmt"
 	"net/url"
@@ -14,7 +15,7 @@ import (
 var requestURL, _ = url.Parse("http://example.com/doc/")
 
 func newTestHTTP(t *testing.T) (sling.HTTP, *httpmock.Transport) {
-	return httpmock.NewHTTP(t, requestURL.String())
+	return slingmock.NewHTTP(t, requestURL.String())
 }
 
 func TestJson_RequestUsesTheProvidedMethod(t *testing.T) {
