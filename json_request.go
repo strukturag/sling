@@ -59,6 +59,7 @@ type jsonRequest struct {
 	method, path           string
 	body, success, failure JSON
 	statusErrors           map[int]error
+	*url.URL
 }
 
 // JSONRequest creates a new builder for a request with the
@@ -101,7 +102,7 @@ func (request *jsonRequest) StatusError(statusCode int, err error) JSONRequestBu
 
 func (request *jsonRequest) HTTPRequest(baseURL *url.URL) (*http.Request, HTTPResponder, error) {
 	requestedURL, _ := url.Parse(strings.TrimLeft(request.path, "/"))
-	url := baseURL.ResolveReference(requestedURL)
+	request.URL = baseURL.ResolveReference(requestedURL)
 
 	body := new(bytes.Buffer)
 	if request.body != nil {
@@ -110,7 +111,7 @@ func (request *jsonRequest) HTTPRequest(baseURL *url.URL) (*http.Request, HTTPRe
 		}
 	}
 
-	req, err := http.NewRequest(request.method, url.String(), body)
+	req, err := http.NewRequest(request.method, request.URL.String(), body)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -129,7 +130,7 @@ func (responder *jsonRequest) OnHTTPResponse(res *http.Response) error {
 		}
 		return nil
 	} else {
-		err := fmt.Errorf("JSON request failed with status %d", res.StatusCode)
+		err := fmt.Errorf("request %s %s as JSON returned status %d", responder.method, responder.URL, res.StatusCode)
 
 		// TODO(lcooper): We should also decode the failure body if provided.
 		// Unclear what should be returned if there's both a StatusError

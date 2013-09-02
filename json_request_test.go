@@ -3,6 +3,7 @@ package sling
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -163,6 +164,41 @@ func TestJson_RequestFails(t *testing.T) {
 	httpClient.error = errors.New("Failed")
 	if err := jsonClient.Do(JSONRequest("", "")); err != httpClient.error {
 		t.Errorf("Expected request to produce error %v, but got %v", httpClient.error, err)
+	}
+}
+
+func TestJson_RequestDefaultErrorIncludesRequestAndResponseInformation(t *testing.T) {
+	method := "OPTIONS"
+	path := "/api/v1/to/madness"
+	baseURL, _ := url.Parse("http://no.such.domain.xxx")
+	statusCode := 500
+	requestBuilder := JSONRequest(method, path)
+	_, responder, err := requestBuilder.HTTPRequest(baseURL)
+	if err != nil {
+		t.Fatalf("Unexpected error creating HTTP request: %v", err)
+	}
+
+	err = responder.OnHTTPResponse(newResponse(statusCode, ""))
+
+	if err == nil {
+		t.Fatal("No error returned for unsuccessful response")
+	}
+
+	msg := err.Error()
+	if strings.Index(msg, method) == -1 {
+		t.Errorf("Expected error '%s' to contain HTTP method '%s'", msg, method)
+	}
+
+	if strings.Index(msg, path) == -1 {
+		t.Errorf("Expected error '%s' to contain path '%s'", msg, path)
+	}
+
+	if strings.Index(msg, baseURL.String()) == -1 {
+		t.Errorf("Expected error '%s' to contain base url '%s'", msg, baseURL)
+	}
+
+	if strings.Index(msg, fmt.Sprintf("%d", statusCode)) == -1 {
+		t.Errorf("Expected error '%s' to contain HTTP response status '%d'", msg, statusCode)
 	}
 }
 
