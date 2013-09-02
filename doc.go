@@ -1,4 +1,4 @@
-// Package sling provides a connection limited HTTP client which ensures that 
+// Package sling provides a connection limited HTTP client which ensures that
 // HTTP keep-alive is used whenever possible.
 //
 // Additionally, it provides a fluent DSL for constructing HTTP requests with

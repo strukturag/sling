@@ -2,11 +2,11 @@ package sling_test
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"golang.struktur.de/sling"
 	"golang.struktur.de/sling/httpmock"
 	"golang.struktur.de/sling/slingmock"
-	"errors"
-	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -41,7 +41,7 @@ func TestJson_RequestUsesThePathRelatativeToTheBaseURL(t *testing.T) {
 		t.Fatalf("Unexpected error '%v' making request", err)
 	}
 
-	expectedPath := strings.TrimRight(requestURL.Path, "/")+path
+	expectedPath := strings.TrimRight(requestURL.Path, "/") + path
 	transport.AssertRequestPath(expectedPath)
 }
 
