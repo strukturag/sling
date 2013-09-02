@@ -1,0 +1,5 @@
+sling (0.0.1) precise; urgency=low
+
+  * Initial debianized release.
+
+ -- Lance Cooper <lance@struktur.de>  Mon, 02 Sep 2013 16:08:49 +0200
