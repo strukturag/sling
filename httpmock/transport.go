@@ -72,6 +72,14 @@ func (fake *fakeConnectionPool) HTTP(baseURL string) (sling.HTTP, error) {
 	}, nil
 }
 
+// NewHTTP creates a HTTP client with it's own ConnectionPool which uses the
+// returned mock Transport to make requests.
+func NewHTTP(t *testing.T, baseURL string) (sling.HTTP, *Transport) {
+	pool, transport := NewConnectionPool(t)
+	http, _ := pool.HTTP(baseURL)
+	return http, transport
+}
+
 // NewTransport creates a new Transport instance which reports assertion errors
 // to the given testing.T.
 //
@@ -99,6 +107,11 @@ func (fake *Transport) SetResponseStatusCode(statusCode int) {
 	fake.response.StatusCode = statusCode
 }
 
+// SetResponseStatusOK sets the HTTP status code of the response to http.StatusOK
+func (fake *Transport) SetResponseStatusOK() {
+	fake.SetResponseStatusCode(http.StatusOK)
+}
+
 // SetResponseBody sets the response body to a reader against body.
 func (fake *Transport) SetResponseBody(body string) {
 	fake.response.Body = newClosableStringReader(body)
@@ -113,6 +126,11 @@ func (fake *Transport) SetResponseBodyJSON(data interface{}) {
 	} else {
 		fake.SetResponseBody(string(result))
 	}
+}
+
+// SetResponseBodyValidJSON sets the response body to an empty but valid JSON map.
+func (fake *Transport) SetResponseBodyValidJSON() {
+	fake.SetResponseBody("{}")
 }
 
 // SetResponseBodyInvalidJSON sets the response body to a string which all JSON parsers will reject.
