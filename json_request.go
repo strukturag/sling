@@ -42,6 +42,9 @@ type JSONRequestBuilder interface {
 	//
 	// If the object implements Errorable, the error returned by AsError()
 	// will be returned as the response.
+	//
+	// If the object implements error, it will be returned directly unless
+	// it is also an Errorable.
 	Failure(JSON) JSONRequestBuilder
 
 	// StatusError sets the error return for responses with HTTP status
@@ -152,6 +155,8 @@ func (responder *jsonRequest) OnHTTPResponse(res *http.Response) error {
 		switch v := responder.failure.(type) {
 		case Errorable:
 			return v.AsError()
+		case error:
+			return v
 		default:
 			return err
 		}

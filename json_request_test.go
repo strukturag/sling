@@ -14,6 +14,14 @@ import (
 
 var requestURL, _ = url.Parse("http://example.com/doc/")
 
+type errorResponse  struct {
+	Message string
+}
+
+func (err *errorResponse) Error() string {
+	return err.Message
+}
+
 func newTestHTTP(t *testing.T) (sling.HTTP, *httpmock.Transport) {
 	return slingmock.NewHTTP(t, requestURL.String())
 }
@@ -151,6 +159,20 @@ func TestJson_RequestReceivesRegisteredError(t *testing.T) {
 	err := http.Do(sling.JSONRequest("", "").StatusError(499, expectedError))
 	if err != expectedError {
 		t.Errorf("Expected registered error '%v' to be returned for error status, but was '%v'", expectedError, err)
+	}
+}
+
+func TestJson_RequestFailsWithAnErrorResponseBodySet(t *testing.T) {
+	message := "Error Message"
+	http, transport := newTestHTTP(t)
+	transport.SetResponseStatusCode(500)
+	transport.SetResponseBodyJSON(&errorResponse{message})
+	
+	errorResponse := &errorResponse{}
+	err := http.Do(sling.JSONRequest("", "").Failure(errorResponse))
+
+	if err.Error() != message {
+		t.Errorf("Expected error message '%s' for return of type error, but was '%v'", message, err)
 	}
 }
 
