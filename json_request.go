@@ -25,6 +25,9 @@ type Errorable interface {
 // JSONRequestBuilder instances allow the construction of a HTTP request
 // whose response is a JSON document.
 type JSONRequestBuilder interface {
+	// Header sets an optional HTTP request header.
+	Header(name, value string) JSONRequestBuilder
+
 	// Body sets an optional object which will be serialized as JSON
 	// to create the body of the HTTP request.
 	Body(JSON) JSONRequestBuilder
@@ -62,6 +65,7 @@ type jsonRequest struct {
 	method, path           string
 	body, success, failure JSON
 	statusErrors           map[int]error
+	headers http.Header
 	*url.URL
 }
 
@@ -74,7 +78,13 @@ func JSONRequest(method, path string) JSONRequestBuilder {
 		method:       method,
 		path:         path,
 		statusErrors: make(map[int]error),
+		headers: make(http.Header),
 	}
+}
+
+func (request *jsonRequest) Header(name, value string) JSONRequestBuilder {
+	request.headers.Add(name, value)
+	return request
 }
 
 func (request *jsonRequest) Body(body JSON) JSONRequestBuilder {
@@ -117,6 +127,12 @@ func (request *jsonRequest) HTTPRequest(baseURL *url.URL) (*http.Request, HTTPRe
 	req, err := http.NewRequest(request.method, request.URL.String(), body)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	for name, values := range request.headers {
+		for _, value := range values {
+			req.Header.Add(name, value)
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/json")

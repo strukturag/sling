@@ -53,6 +53,20 @@ func TestJson_RequestUsesThePathRelatativeToTheBaseURL(t *testing.T) {
 	transport.AssertRequestPath(expectedPath)
 }
 
+func TestJson_RequestUsesProvidedHeaders(t *testing.T) {
+	request := sling.JSONRequest("", "").
+		Header("X-Foo-Status", "bar")
+	http, transport := newTestHTTP(t)
+	transport.SetResponseStatusOK()
+	transport.SetResponseBodyValidJSON()
+
+	if err := http.Do(request); err != transport.error {
+		t.Fatalf("Unexpected error '%v' making request", err)
+	}
+
+	transport.AssertRequestHeader("X-Foo-Status", "bar")
+}
+
 func TestJson_RequestSuppliesAppropriateHeaders(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusOK()

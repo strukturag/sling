@@ -129,6 +129,16 @@ func (fake *Transport) AssertRequestPath(path string) {
 	}
 }
 
+// AssertRequestHeader tests that the request has a header of the the given
+// name with the given value.
+func (fake *Transport) AssertRequestHeader(name, value string) {
+	fake.assertRequestMade()
+
+	if actual := fake.request.Header.Get(name); actual != value {
+		fake.t.Errorf("Expected HTTP request to have header %s with value %s, but was %s", name, value, actual)
+	}
+}
+
 // AssertRequestContentType tests that the request has a Content-Type header equal to contentType.
 func (fake *Transport) AssertRequestContentType(contentType string) {
 	fake.assertRequestMade()
