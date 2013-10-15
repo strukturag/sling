@@ -1,3 +1,9 @@
+sling (0.0.3) precise; urgency=low
+
+  * Add support for setting request headers.
+
+ -- Lance Cooper <lance@struktur.de>  Tue, 15 Oct 2013 15:14:50 -0500
+
 sling (0.0.2) precise; urgency=low
 
   * Add support for JSON failure responses which directly implement error.
