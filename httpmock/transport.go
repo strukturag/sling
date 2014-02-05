@@ -23,8 +23,8 @@ var DefaultURLString = "http://httpmock.default.url.tld"
 type Transport struct {
 	request  *http.Request
 	response http.Response
-	error
-	t *testing.T
+	error    error
+	t        *testing.T
 }
 
 // NewTransport creates a new Transport instance which reports assertion errors
@@ -83,6 +83,11 @@ func (fake *Transport) SetResponseBodyValidJSON() {
 // SetResponseBodyInvalidJSON sets the response body to a string which all JSON parsers will reject.
 func (fake *Transport) SetResponseBodyInvalidJSON() {
 	fake.SetResponseBody("{[")
+}
+
+// ResponseError returns the error used to simulate connection errors, if any.
+func (fake *Transport) ResponseError() error {
+	return fake.error
 }
 
 // SetResponseError forces an error return from the the Transport to simulate a connection error.

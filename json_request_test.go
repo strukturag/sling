@@ -32,7 +32,7 @@ func TestJson_RequestUsesTheProvidedMethod(t *testing.T) {
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyValidJSON()
 
-	if err := http.Do(sling.JSONRequest(method, "")); err != transport.error {
+	if err := http.Do(sling.JSONRequest(method, "")); err != nil {
 		t.Fatalf("Unexpected error '%v' making request", err)
 	}
 
@@ -45,7 +45,7 @@ func TestJson_RequestUsesThePathRelatativeToTheBaseURL(t *testing.T) {
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyValidJSON()
 
-	if err := http.Do(sling.JSONRequest("", path)); err != transport.error {
+	if err := http.Do(sling.JSONRequest("", path)); err != nil {
 		t.Fatalf("Unexpected error '%v' making request", err)
 	}
 
@@ -60,7 +60,7 @@ func TestJson_RequestUsesProvidedHeaders(t *testing.T) {
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyValidJSON()
 
-	if err := http.Do(request); err != transport.error {
+	if err := http.Do(request); err != transport.ResponseError() {
 		t.Fatalf("Unexpected error '%v' making request", err)
 	}
 
@@ -71,7 +71,7 @@ func TestJson_RequestSuppliesAppropriateHeaders(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyValidJSON()
-	if err := http.Do(sling.JSONRequest("", "")); err != transport.error {
+	if err := http.Do(sling.JSONRequest("", "")); err != nil {
 		t.Fatalf("Unexpected error '%v' making request", err)
 	}
 
@@ -128,9 +128,9 @@ func TestJson_RequestDecodesTheResponseAsJSON(t *testing.T) {
 
 func TestJson_RequestFails(t *testing.T) {
 	http, transport := newTestHTTP(t)
-	transport.error = errors.New("Failed")
-	if err := http.Do(sling.JSONRequest("", "")); err != transport.error {
-		t.Errorf("Expected request to produce error %v, but got %v", transport.error, err)
+	transport.SetResponseError()
+	if err := http.Do(sling.JSONRequest("", "")); err != transport.ResponseError() {
+		t.Errorf("Expected request to produce error %v, but got %v", transport.ResponseError(), err)
 	}
 }
 
