@@ -57,6 +57,11 @@ type JSONRequestBuilder interface {
 	// response or when used for 1XX or 2XX statuses.
 	StatusError(statusCode int, err error) JSONRequestBuilder
 
+	// StatusRPC indicates that requests returning 1XX or 2XX status codes
+	// may be errors, and thus deserialized response should be interpreted
+	// as described by Failure in all cases.
+	StatusIsRPC() JSONRequestBuilder
+
 	// HTTPRequestable methods may be used to initiate a request/response cycle.
 	HTTPRequestable
 }
@@ -65,7 +70,8 @@ type jsonRequest struct {
 	method, path           string
 	body, success, failure JSON
 	statusErrors           map[int]error
-	headers http.Header
+	statusIsRPC            bool
+	headers                http.Header
 	*url.URL
 }
 
@@ -113,6 +119,11 @@ func (request *jsonRequest) StatusError(statusCode int, err error) JSONRequestBu
 	return request
 }
 
+func (request *jsonRequest) StatusIsRPC() JSONRequestBuilder {
+	request.statusIsRPC = true
+	return request
+}
+
 func (request *jsonRequest) HTTPRequest(baseURL *url.URL) (*http.Request, HTTPResponder, error) {
 	requestedURL, _ := url.Parse(strings.TrimLeft(request.path, "/"))
 	request.URL = baseURL.ResolveReference(requestedURL)
@@ -145,7 +156,13 @@ func (responder *jsonRequest) OnHTTPResponse(res *http.Response) error {
 	decoder := json.NewDecoder(res.Body)
 	if res.StatusCode < http.StatusBadRequest {
 		if responder.success != nil {
-			return decoder.Decode(responder.success)
+			if err := decoder.Decode(responder.success); err != nil {
+				return err
+			}
+
+			if responder.statusIsRPC {
+				return asError(responder.success, nil)
+			}
 		}
 		return nil
 	} else {
@@ -168,13 +185,17 @@ func (responder *jsonRequest) OnHTTPResponse(res *http.Response) error {
 			return err
 		}
 
-		switch v := responder.failure.(type) {
-		case Errorable:
-			return v.AsError()
-		case error:
-			return v
-		default:
-			return err
-		}
+		return asError(responder.failure, err)
+	}
+}
+
+func asError(response interface{}, defaultError error) error {
+	switch v := response.(type) {
+	case Errorable:
+		return v.AsError()
+	case error:
+		return v
+	default:
+		return defaultError
 	}
 }

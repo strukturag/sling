@@ -22,6 +22,19 @@ func (err *errorResponse) Error() string {
 	return err.Message
 }
 
+var errorableError = errors.New("Errorable error")
+
+type errorableResponse struct {
+	IsError bool
+}
+
+func (errorable *errorableResponse) AsError() (err error) {
+	if errorable.IsError {
+		err = errorableError
+	}
+	return
+}
+
 func newTestHTTP(t *testing.T) (sling.HTTP, *httpmock.Transport) {
 	return slingmock.NewHTTP(t, requestURL.String())
 }
@@ -201,5 +214,41 @@ func TestJson_RequestRetrievesBadJSON(t *testing.T) {
 		if _, ok := err.(*json.SyntaxError); !ok {
 			t.Errorf("Expected a JSON syntax error for a malformed response with HTTP status %d, but was %v", status, err)
 		}
+	}
+}
+
+func TestJson_RequestReceivesRPCSuccess(t * testing.T) {
+	http, transport := newTestHTTP(t)
+	transport.SetResponseStatusOK()
+	transport.SetResponseBodyJSON(&errorableResponse{false})
+	
+	errorResponse := &errorableResponse{}
+	err := http.Do(sling.JSONRequest("", "").StatusIsRPC().Response(errorResponse))
+	if err != nil {
+		t.Errorf("No error expected for successful RPC response, but got '%v'", err)
+	}
+}
+
+func TestJson_RequestReceivesErrorableSuccess(t * testing.T) {
+	http, transport := newTestHTTP(t)
+	transport.SetResponseStatusOK()
+	transport.SetResponseBodyJSON(&errorableResponse{true})
+
+	errorResponse := &errorableResponse{}
+	err := http.Do(sling.JSONRequest("", "").Response(errorResponse))
+	if err != nil {
+		t.Errorf("No error expected for successful RPC response, but got '%v'", err)
+	}
+}
+
+func TestJson_RequestReceivesRPCError(t * testing.T) {
+	http, transport := newTestHTTP(t)
+	transport.SetResponseStatusOK()
+	transport.SetResponseBodyJSON(&errorableResponse{true})
+	
+	errorResponse := &errorableResponse{}
+	err := http.Do(sling.JSONRequest("", "").StatusIsRPC().Response(errorResponse))
+	if err != errorableError {
+		t.Errorf("Expected error to be '%v', but was '%v'", errorableError, err)
 	}
 }
