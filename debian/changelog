@@ -1,3 +1,9 @@
+sling (0.0.4) precise; urgency=low
+
+  * Add support for RPC-style status codes.
+
+ -- Lance Cooper <lance@struktur.de>  Fri, 07 Feb 2014 14:25:35 -0600
+
 sling (0.0.3) precise; urgency=low
 
   * Add support for setting request headers.
