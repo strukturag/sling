@@ -84,7 +84,7 @@ func JSONRequest(method, path string) JSONRequestBuilder {
 		method:       method,
 		path:         path,
 		statusErrors: make(map[int]error),
-		headers: make(http.Header),
+		headers:      make(http.Header),
 	}
 }
 

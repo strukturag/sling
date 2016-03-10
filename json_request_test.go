@@ -14,7 +14,7 @@ import (
 
 var requestURL, _ = url.Parse("http://example.com/doc/")
 
-type errorResponse  struct {
+type errorResponse struct {
 	Message string
 }
 
@@ -194,7 +194,7 @@ func TestJson_RequestFailsWithAnErrorResponseBodySet(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusCode(500)
 	transport.SetResponseBodyJSON(&errorResponse{message})
-	
+
 	errorResponse := &errorResponse{}
 	err := http.Do(sling.JSONRequest("", "").Failure(errorResponse))
 
@@ -217,11 +217,11 @@ func TestJson_RequestRetrievesBadJSON(t *testing.T) {
 	}
 }
 
-func TestJson_RequestReceivesRPCSuccess(t * testing.T) {
+func TestJson_RequestReceivesRPCSuccess(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyJSON(&errorableResponse{false})
-	
+
 	errorResponse := &errorableResponse{}
 	err := http.Do(sling.JSONRequest("", "").StatusIsRPC().Response(errorResponse))
 	if err != nil {
@@ -229,7 +229,7 @@ func TestJson_RequestReceivesRPCSuccess(t * testing.T) {
 	}
 }
 
-func TestJson_RequestReceivesErrorableSuccess(t * testing.T) {
+func TestJson_RequestReceivesErrorableSuccess(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyJSON(&errorableResponse{true})
@@ -241,11 +241,11 @@ func TestJson_RequestReceivesErrorableSuccess(t * testing.T) {
 	}
 }
 
-func TestJson_RequestReceivesRPCError(t * testing.T) {
+func TestJson_RequestReceivesRPCError(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseStatusOK()
 	transport.SetResponseBodyJSON(&errorableResponse{true})
-	
+
 	errorResponse := &errorableResponse{}
 	err := http.Do(sling.JSONRequest("", "").StatusIsRPC().Response(errorResponse))
 	if err != errorableError {
