@@ -142,8 +142,8 @@ func TestJson_RequestDecodesTheResponseAsJSON(t *testing.T) {
 func TestJson_RequestFails(t *testing.T) {
 	http, transport := newTestHTTP(t)
 	transport.SetResponseError()
-	if err := http.Do(sling.JSONRequest("", "")); err != transport.ResponseError() {
-		t.Errorf("Expected request to produce error %v, but got %v", transport.ResponseError(), err)
+	if err := http.Do(sling.JSONRequest("", "")); strings.Index(err.Error(), transport.ResponseError().Error()) == -1 {
+		t.Errorf("Expected request to contain error %v, but got %v", transport.ResponseError(), err)
 	}
 }
 
