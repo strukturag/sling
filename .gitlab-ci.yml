@@ -1,3 +1,5 @@
 job:
   script:
-    - GOPATH=/tmp/go go test -v
+    - make goget
+    - make build
+    - make test
