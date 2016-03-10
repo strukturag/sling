@@ -8,12 +8,15 @@ import (
 )
 
 type fakeSleepingHttpClient struct {
+	sync.Mutex
 	requests []*http.Request
 }
 
 func (fake *fakeSleepingHttpClient) Do(req *http.Request) (*http.Response, error) {
 	// NOTE(lcooper): Totally not an abuse of the ContentLength field ;)
-	time.Sleep(time.Duration(req.ContentLength) * 1000)
+	time.Sleep(time.Duration(req.ContentLength) * time.Millisecond)
+	fake.Lock()
+	defer fake.Unlock()
 	if fake.requests == nil {
 		fake.requests = make([]*http.Request, 0, 1)
 	}
@@ -32,15 +35,19 @@ func TestThrottledHTTPClient_Do(t *testing.T) {
 	}
 
 	wrappedClient := &fakeSleepingHttpClient{}
-	client := newThrottledHTTPClient(wrappedClient, len(queries)-1)
+	client := newThrottledHTTPClient(wrappedClient, 1)
 
 	queryExecutors := &sync.WaitGroup{}
+	order := make(chan bool, 1)
 	for _, query := range queries {
 		queryExecutors.Add(1)
 		go func(request *http.Request) {
+			order <- true
 			client.Do(request)
 			queryExecutors.Done()
+
 		}(query.request)
+		<-order
 	}
 	queryExecutors.Wait()
 
