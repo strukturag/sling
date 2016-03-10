@@ -2,4 +2,4 @@ job:
   script:
     - make goget
     - make build
-    - make test
+    - GOMAXPROCS=4 make test
