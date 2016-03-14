@@ -1,3 +1,9 @@
+sling (0.1.1) trusty; urgency=medium
+
+  * Fixed build dependencies and use godeps from Github.
+
+ -- Simon Eisenmann <simon@struktur.de>  Mon, 14 Mar 2016 14:23:00 +0100
+
 sling (0.1.0) trusty; urgency=medium
 
   * Gofmt for the rescue.
