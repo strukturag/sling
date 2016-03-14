@@ -8,11 +8,14 @@ Upstream Author:
 
 Copyright:
 
-    Copyright (C) 1999-2013  struktur AG <http://www.strukturag.com>
+    Copyright (C) 1999-2016  struktur AG <http://www.strukturag.com>
+
+and is licensed under a BSD style license. See LICENSE file for
+details.
 
 The Debian packaging is:
 
     Copyright (C) 2013 struktur AG <info@struktur.de>
 
-and is licensed under the GNU Affero General Public License, 
+and is licensed under the GNU Affero General Public License,
 see `http://www.gnu.org/licenses/'.
