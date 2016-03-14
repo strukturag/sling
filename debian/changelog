@@ -1,3 +1,18 @@
+sling (0.1.0) trusty; urgency=medium
+
+  * Gofmt for the rescue.
+  * Added CI.
+  * Use GOPATH in CI.
+  * Fixed ci.
+  * Added Makefile to build.
+  * Use 4 threads in tests.
+  * Fixed TestThrottledHTTPClient_Do with Go1.6 by adding locks and multi threading startup code.
+  * Fix test comparision.
+  * Added BSD style license.
+  * Bumped debian copyright.
+
+ -- Simon Eisenmann <simon@struktur.de>  Mon, 14 Mar 2016 14:05:08 +0100
+
 sling (0.0.4) precise; urgency=low
 
   * Add support for RPC-style status codes.
